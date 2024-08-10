@@ -2,7 +2,6 @@ use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use log::error;
 use reqwest::blocking as request;
 use std::{
-    ffi::OsStr,
     fs::File,
     io::{self, BufWriter, Read, Write},
     path::Path,
@@ -29,11 +28,10 @@ pub fn download_ev1_file(
     let mut res = request::get(decoded_url)?;
 
     let url = Url::parse(decoded_url)?;
-    let filename = Path::new(url.path())
-        .file_name()
-        .unwrap_or(OsStr::new(DEFAULT_FILENAME))
-        .to_str()
-        .unwrap_or(DEFAULT_FILENAME);
+    let filename = match Path::new(url.path()).file_name() {
+        Some(name) => name.to_str().unwrap_or(DEFAULT_FILENAME),
+        None => DEFAULT_FILENAME,
+    };
 
     let mut file = BufWriter::new(File::create_new(format!("{}.flv", filename))?);
 
