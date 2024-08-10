@@ -1,3 +1,5 @@
+//! Utilities for downloading and decrypting ev1 video.
+
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use log::error;
 use reqwest::blocking as request;
@@ -11,16 +13,45 @@ use url::Url;
 
 const DEFAULT_FILENAME: &str = "video";
 
+/// Error occurs while downloading an ev1 video file.
 #[derive(Error, Debug)]
 pub enum Ev1DownloadError {
+    /// The given URL is not valid, and fails when trying to parse it.
     #[error("Could not parse given decoded URL: {0}")]
     InvalidDecodedUrl(#[from] url::ParseError),
+
+    /// Could not create or output to the video file on local filesystem.
     #[error("Failed to write video file: {0}")]
     FileOutputFailed(#[from] io::Error),
+
+    /// Http request on the given url fails.
     #[error("Failed to make http request: {0}")]
     HttpRequestFailed(#[from] reqwest::Error),
 }
 
+/// Download an ev1 video file from a decoded URL.
+///
+/// Decryption is done before writing to file, thus resulting a decrypted flv video.
+/// The filename is the filename in the given URL, with an additional `.flv` suffix.
+///
+/// Please note that this function does not overwrite file.
+/// If the target file already exists, it fails.
+///
+/// # Params
+///
+/// - `decoded_url`: Decoded URL of the ev1 file
+/// - `multi_progress`: A `MultiProgress` instance of indicatif. Used to show progress bar.
+///
+/// # Examples
+///
+/// ```
+/// let url = "http://localhost/test.ev1"
+/// let multi = MultiProgress::new();
+///
+/// download_ev1_file(&decoded_url, &multi).unwrap();
+///
+/// assert!(Path::new("test.ev1.flv").exists());
+/// ```
 pub fn download_ev1_file(
     decoded_url: &str,
     multi_progress: &MultiProgress,
@@ -61,6 +92,7 @@ pub fn download_ev1_file(
     Ok(())
 }
 
+/// Get a `ProgressStyle` for new progress bars.
 fn new_progress_style() -> ProgressStyle {
     ProgressStyle::with_template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} (eta {eta_precise})")
         .unwrap()  // This unwrap should be ok, since template is string literal
