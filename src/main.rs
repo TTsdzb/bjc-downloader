@@ -14,6 +14,13 @@ struct Args {
     url: String,
     #[arg(short, long, help = "显示调试信息", long_help = "启用调试信息的输出。")]
     debug: bool,
+    #[arg(
+        short,
+        long,
+        help = "指定输出文件名（不包含扩展名）",
+        long_help = "指定输出的视频文件名。程序会自动添加 `.flv` 后缀，因此请不要手动给出扩展名。"
+    )]
+    output: Option<String>,
 }
 
 fn main() -> ExitCode {
@@ -46,7 +53,7 @@ fn main() -> ExitCode {
 
     debug!("视频链接：{}", &decoded_url);
 
-    match ev1_downloader::download_ev1_file(&decoded_url, &multi) {
+    match ev1_downloader::download_ev1_file(&decoded_url, args.output.as_deref(), &multi) {
         Err(err) => {
             error!("下载视频时遇到错误：{}", err);
             return ExitCode::FAILURE;

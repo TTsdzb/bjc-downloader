@@ -1,7 +1,7 @@
 //! Utilities for downloading and decrypting ev1 video.
 
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
-use log::error;
+use log::debug;
 use reqwest::blocking as request;
 use std::{
     fs::File,
@@ -32,7 +32,7 @@ pub enum Ev1DownloadError {
 /// Download an ev1 video file from a decoded URL.
 ///
 /// Decryption is done before writing to file, thus resulting a decrypted flv video.
-/// The filename is the filename in the given URL, with an additional `.flv` suffix.
+/// If not specified, the filename is the filename in the given URL, with an additional `.flv` suffix.
 ///
 /// Please note that this function does not overwrite file.
 /// If the target file already exists, it fails.
@@ -40,6 +40,7 @@ pub enum Ev1DownloadError {
 /// # Params
 ///
 /// - `decoded_url`: Decoded URL of the ev1 file
+/// - `output_filename`: Filename of the output video file. Suffix should be omitted.
 /// - `multi_progress`: A `MultiProgress` instance of indicatif. Used to show progress bar.
 ///
 /// # Examples
@@ -54,15 +55,21 @@ pub enum Ev1DownloadError {
 /// ```
 pub fn download_ev1_file(
     decoded_url: &str,
+    output_filename: Option<&str>,
     multi_progress: &MultiProgress,
 ) -> Result<(), Ev1DownloadError> {
     let mut res = request::get(decoded_url)?;
 
     let url = Url::parse(decoded_url)?;
-    let filename = match Path::new(url.path()).file_name() {
-        Some(name) => name.to_str().unwrap_or(DEFAULT_FILENAME),
-        None => DEFAULT_FILENAME,
+    let filename = match output_filename {
+        Some(name) => name,
+        None => match Path::new(url.path()).file_name() {
+            Some(name) => name.to_str().unwrap_or(DEFAULT_FILENAME),
+            None => DEFAULT_FILENAME,
+        },
     };
+
+    debug!("输出文件名：{}", filename);
 
     let mut file = BufWriter::new(File::create_new(format!("{}.flv", filename))?);
 
