@@ -49,7 +49,7 @@ pub enum Ev1DownloadError {
 /// let url = "http://localhost/test.ev1"
 /// let multi = MultiProgress::new();
 ///
-/// download_ev1_file(&decoded_url, &multi).unwrap();
+/// download_ev1_file(&decoded_url, None, &multi).unwrap();
 ///
 /// assert!(Path::new("test.ev1.flv").exists());
 /// ```
