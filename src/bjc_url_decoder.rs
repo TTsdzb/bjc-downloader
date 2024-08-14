@@ -8,10 +8,10 @@ const URL_PREFIX: &str = "bjcloudvod://";
 
 /// Error occurs while decoding bjc URL.
 #[derive(Error, Debug)]
-pub enum BjcUrlDecodeError<'a> {
+pub enum BjcUrlDecodeError {
     /// The given URL is not a bjcloudvod URL, and might be something else.
     #[error("Given str `{0}` is not a valid bjcloudvod URL")]
-    InvalidUrl(&'a str),
+    InvalidUrl(String),
 
     /// Could not decode the base64 string in the given URL's body.
     #[error("Could not decode base64 string: {0}")]
@@ -29,7 +29,7 @@ pub enum BjcUrlDecodeError<'a> {
 /// Decoded URL string of the given URL, usually a link for an ev1 video file.
 pub fn decode_bjc_url(url: &str) -> Result<String, BjcUrlDecodeError> {
     if !url.starts_with(URL_PREFIX) {
-        return Err(BjcUrlDecodeError::InvalidUrl(url));
+        return Err(BjcUrlDecodeError::InvalidUrl(String::from(url)));
     }
 
     let base64 = &url[13..];

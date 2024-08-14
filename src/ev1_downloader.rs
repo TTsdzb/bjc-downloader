@@ -41,7 +41,7 @@ pub enum Ev1DownloadError {
 ///
 /// - `decoded_url`: Decoded URL of the ev1 file
 /// - `output_filename`: Filename of the output video file. Suffix should be omitted.
-/// - `multi_progress`: A `MultiProgress` instance of indicatif. Used to show progress bar.
+/// - `multi_progress`: A `MultiProgress` instance of [indicatif](https://docs.rs/indicatif/latest/indicatif/). Used to show progress bar.
 ///
 /// # Examples
 ///
